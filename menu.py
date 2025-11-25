@@ -60,7 +60,7 @@ class MenuApp(ctk.CTkToplevel):
             self.frame_botoes,
             width=300,
             height=50,
-            text="Opção 1".upper(),
+            text="Questionário".upper(),
             font=("Century Gothic Bold", 14),
             corner_radius=15,
             command=self.abrir_tela1
@@ -126,7 +126,8 @@ class MenuApp(ctk.CTkToplevel):
         self.btn_sair.grid(row=2, column=1, padx=15, pady=10)
         
     def abrir_tela1(self):
-        messagebox.showinfo("Menu", "Tela 1 ainda não implementada!")
+        import questionario
+        questionario.Questionario(self, self.username)
     
     def abrir_tela2(self):
         messagebox.showinfo("Menu", "Tela 2 ainda não implementada!")
@@ -147,6 +148,7 @@ class MenuApp(ctk.CTkToplevel):
         self.parent.deiconify()
     
     def fechar_aplicacao(self):
-        # Fecha tudo
-        self.parent.destroy()
-        self.destroy()
+        try:
+            self.parent.destroy()
+        except:
+            pass
