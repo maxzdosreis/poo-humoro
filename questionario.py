@@ -13,8 +13,13 @@ class Questionario(ctk.CTkToplevel):
         self.parent = parent
         self.username = username
         self.db = Database()
+
+        # Variáveis de controle        
+        self.modo_edicao = False
+        self.questionario_id = None
         
         self.configuracoes_janela()
+        self.verificar_questionario_existente()
         self.criar_questionario()
         
         self.protocol("WM_DELETE_WINDOW", self.fechar)
@@ -29,21 +34,45 @@ class Questionario(ctk.CTkToplevel):
         self.lift() # Traz a janela para frente
         self.focus_force() # Fora o foco nesse janela
         self.grab_set() # Torna a janela modal (fazendo com que o usuário não consiga interagir com a tela de menu enquanto a janela está aberta)
+    
+    def verificar_questionario_existente(self):
+        """
+        Verifica se o usuário já responde o questionário hoje.
+        Se sim, carrega os dados para edição.
+        """
+        ja_respondeu, dados = self.db.verificar_questionario_hoje(self.username)
+        
+        if ja_respondeu:
+            self.modo_edicao = True
+            self.questionario_id = dados['id']
+            self.dados_existentes = dados
+            
+            messagebox.showinfo(
+                "Questionário já respondido",
+                f"Você já respondeu o questionário hoje às {dados['hora']}.\n\n"
+                "Você pode editar suas respostas se desejar."
+            )
        
     # método que cria o questionário 
     def criar_questionario(self):
         # Título principal
+        titulo_texto = "Editar Questionário" if self.modo_edicao else "Questionário Diário"
         self.lb_title = ctk.CTkLabel(
             self,
-            text="Questionário Diário",
+            text=titulo_texto,
             font=("Century Gothic Bold", 28)
         )
         self.lb_title.pack(pady=20)  
         
-        # Subtítulo com nome do usuário 
+        # Subtítulo com nome do usuário
+        if self.modo_edicao:
+            subtitulo = f"Olá, {self.username}! Edite suas respostas de hoje:"
+        else: 
+            subtitulo = f"Olá, {self.username}! Como você está se sentindo hoje?"
+        
         self.lb_subtitle = ctk.CTkLabel(
             self,
-            text=f"Olá, {self.username}! Como você está se sentindo hoje?",
+            text=subtitulo,
             font=("Century Gothic Bold", 14)
         )
         self.lb_subtitle.pack(pady=5)
@@ -60,10 +89,16 @@ class Questionario(ctk.CTkToplevel):
          - StringVar() é uma variável especial do Tkinter que armazena valores dinâmicos
          - inicia com o valor vazio (sem nenhuma opção selecionada)
         '''
-        self.var_humor = ctk.StringVar(value="")
-        self.var_sono = ctk.StringVar(value="")
-        self.var_social = ctk.StringVar(value="")
-        self.var_lazer = ctk.StringVar(value="")
+        if self.modo_edicao:
+            self.var_humor = ctk.StringVar(value=self.dados_existentes['humor'])
+            self.var_sono = ctk.StringVar(value=self.dados_existentes['sono'])
+            self.var_social = ctk.StringVar(value=self.dados_existentes['social'])
+            self.var_lazer = ctk.StringVar(value=self.dados_existentes['lazer'])
+        else:
+            self.var_humor = ctk.StringVar(value="")
+            self.var_sono = ctk.StringVar(value="")
+            self.var_social = ctk.StringVar(value="")
+            self.var_lazer = ctk.StringVar(value="")
         
         # opções de resposta
         opcoes = ["Excelente", "Bom", "Mediano", "Ruim", "Péssimo"]
@@ -116,12 +151,13 @@ class Questionario(ctk.CTkToplevel):
         self.frame_botoes = ctk.CTkFrame(self)
         self.frame_botoes.pack(pady=20)
         
-        # Botão de salvar
+        # Botão de salvar (texto muda dependendo do modo)
+        texto_botao = "ATUALIZAR RESPOSTAS" if self.modo_edicao else "SALVAR RESPOSTAS"
         self.btn_salvar = ctk.CTkButton(
             self.frame_botoes,
             width=250,
             height=45,
-            text="SALVAR RESPOSTAS",
+            text=texto_botao,
             font=("Century Gothic Bold", 14),
             corner_radius=15,
             fg_color="green",
@@ -179,7 +215,7 @@ class Questionario(ctk.CTkToplevel):
          
     # método responsável por salvar as respostas dentro do banco de dados   
     def salvar_respostas(self):
-        """Salva as respostas no banco de dados"""
+        """Salva as respostas no banco de dados (novo ou atualização)"""
         # Validar se todas as perguntas forem respondidas
         if not all([
             self.var_humor.get(),
@@ -197,31 +233,51 @@ class Questionario(ctk.CTkToplevel):
         data_atual = datetime.now().strftime("%Y-%m-%d")
         hora_atual = datetime.now().strftime("%H:%M:%S")
         
-        # chama o método salvar_questionario e executa para salvar o questionário dentro do banco de dados
-        sucesso, mensagem = self.db.salvar_questionario(
-            username = self.username,
-            data = data_atual,
-            hora = hora_atual,
-            humor = self.var_humor.get(),
-            sono = self.var_sono.get(),
-            social = self.var_social.get(),
-            lazer = self.var_lazer.get()
-        )
-        """
-         em caso de sucesso, o sistema retorna uma messagebox, dizendo que foi um sucesso, 
-         e depois limpa as respostas através do método limpar_respostas()
-        """
-        if sucesso:
-            messagebox.showinfo(
-                "Sucesso!",
-                f"Respostas salvas com sucesso!\n\nData: {data_atual}\nHora: {hora_atual}"
+        if self.modo_edicao:
+            # Atualiza o questionário existente
+            sucesso, mensagem = self.db.atualizar_questionario(
+                questionario_id = self.questionario_id,
+                humor = self.var_humor.get(),
+                sono = self.var_sono.get(),
+                social = self.var_social.get(),
+                lazer = self.var_lazer.get()
             )
-            self.limpar_respostas()
             """
-            em caso de falha, o sistema retorna uma messagebox, dizendo que ocorreu um erro
+            em caso de sucesso, o sistema retorna uma messagebox, dizendo que foi um sucesso, e depois fecha
             """
+            if sucesso:
+                messagebox.showinfo(
+                    "Sucesso!",
+                    f"Questionário atualizado com sucesso!\n\nHora: {hora_atual}"
+                )
+                self.fechar()
+                """
+                em caso de falha, o sistema retorna uma messagebox, dizendo que ocorreu um erro
+                """
+            else:
+                messagebox.showerror("Erro", mensagem)
         else:
-            messagebox.showerror("Erro", mensagem)
+            # Cria um novo questionário
+            sucesso, mensagem = self.db.salvar_questionario(
+                username=self.username,
+                data=data_atual,
+                hora=hora_atual,
+                humor=self.var_humor.get(),
+                sono=self.var_sono.get(),
+                social=self.var_social.get(),
+                lazer=self.var_lazer.get()
+            )
+            
+            if sucesso:
+                messagebox.showinfo(
+                    "Sucesso!",
+                    f"Respostas salvas com sucesso!\n\nData: {data_atual}\nHora: {hora_atual}"
+                )
+                # Atualiza para modo edição
+                self.modo_edicao = True
+                self.fechar()
+            else:
+                messagebox.showerror("Erro", mensagem)
             
     # método para limpar as respostas preenchidas no questionário
     def limpar_respostas(self):
