@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 
 class Database:
     def __init__(self, db_name="humoro.db"):
@@ -125,3 +126,75 @@ class Database:
         except Exception as e:
             self.desconecta_db()
             return False, f"Erro ao salvar questionário: {str(e)}"
+        
+    # método que verifica se o questionário já foi respondido hoje
+    def verificar_questionario_hoje(self, username):
+        """
+        Verifica se o usuário já respondeu o questionário hoje
+        
+        Retorna:
+         - (True, dados_questionario) se já respondeu
+         - (False, None) se ainda não respondeu
+        """
+        self.conecta_db()
+        try:
+            # verifica a data de hoje
+            data_hoje = datetime.now().strftime("%Y-%m-%d")
+            
+            # consulta no banco de dados se determinado usuário tem algum questionário criado na current_date
+            self.cursor.execute("""
+                SELECT Id, Humor, Sono, Social, Lazer, Hora
+                FROM Questionarios
+                WHERE Username = ? AND Data = ?                
+            """, (username, data_hoje))
+            
+            resultado = self.cursor.fetchone()
+            self.desconecta_db()
+            
+            if resultado:
+                return True, {
+                    'id': resultado[0],
+                    'humor': resultado[1],
+                    'sono': resultado[2],
+                    'social': resultado[3],
+                    'lazer': resultado[4],
+                    'hora': resultado[5]
+                }
+            else:
+                return False, None
+        except Exception as e:
+            self.desconecta_db()
+            print(f"Erro ao verificar questionário: {str(e)}")
+            return False, None
+        
+    def atualizar_questionario(self, questionario_id, humor, sono, social, lazer):
+        """
+        Atualiza um questionário existente
+        
+        Parâmetros:
+         - questionario_id: ID do questionário a ser atualizado
+         - humor, sono, social, lazer: novas respostas
+         
+        Retorna:
+         - (True, mensagem) se atualizou com sucesso 
+         - (False, None) se ocorreu erro
+        """
+        self.conecta_db()
+        try:
+            # Atualiza a a hora para registrar quando foi editado
+            hora_atual = datetime.now().strftime("%H:%M:%S")
+            
+            # Atualiza o questionário no banco de dados
+            self.cursor.execute("""
+                UPDATE Questionarios
+                SET Humor = ?, Sono = ?, Social = ?, Lazer = ?, Hora = ?
+                WHERE Id = ?                
+            """, (humor, sono, social, lazer, hora_atual, questionario_id))
+            
+            self.conn.commit()
+            self.desconecta_db()
+            
+            return True, "Questionário atualizado com sucesso!"
+        except Exception as e:
+            self.desconecta_db()
+            return False, f"Erro ao atualizar questionário: {str(e)}"
