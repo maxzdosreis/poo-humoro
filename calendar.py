@@ -40,7 +40,7 @@ mes_entrada = ctk.Entry(textvariable = mes, justify = "center")
 mes_entrada.place(relx = 0.3, rely = 0.2, relwidth = 0.1)
 
 #ano#
-ano_label = ctk.Label(text = "ano", font = ("Ariel", 10, "bold"), command = mostrar)
+ano_label = ctk.Label(text = "ano", font = ("Ariel", 10, "bold"), command = Mostrar)
 ano_label.place(relx = 0.5, rely = 0.2)
 ano = ctk.IntVar()
 ano_entrada = ctk.Entry(textvariable = ano, justify = "center")
