@@ -1,5 +1,6 @@
 from tkinter import *
 import calendar
+from datetime import datetime
 
 ##
 root = Tk()
@@ -17,16 +18,17 @@ def Exit():
     root.destroy()
 
 def Mostrar():
-    m = mes.get()
-    y = ano.get()  
+    m = datetime.now().month
+    y = datetime.now().year
 
     if m <= 12 and m > 0:
         outupt = calendar.calendar(y,m)
-        cal.insert(output = "end")
+        cal.insert('end', output)
     
     else:
         output = "O mês não existe"
-        cal.insert("end", output)
+        cal.insert('end', output)    
+
 #texto#
 cal = Text(width = 50 , height = 15, borderwidth = 2)
 cal.place(relx = 0.16, rely = 0.30)
