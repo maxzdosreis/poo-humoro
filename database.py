@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime
+import bcrypt
 
 class Database:
     def __init__(self, db_name="humoro.db"):
@@ -61,13 +62,52 @@ class Database:
         print("Tabelas criadas com sucesso!")
         self.desconecta_db()
         
+    def criptografar_senha(self, senha):
+        """
+        Criptografa uma senha usando bcrypt
+        
+        Parâmetros:
+         - senha: senha em texto (string)
+         
+        Retorna:
+         - senha_hash: senha criptografada (bytes)
+        """
+        # Gera um salt aleatório e criptografa a senha
+        salt = bcrypt.gensalt()
+        senha_hash = bcrypt.hashpw(senha.encode('utf-8'), salt)
+        return senha_hash
+    
+    def verificar_senha(self, senha_digitada, senha_hash):
+        """
+        Verifica se a senha digitada corresponde ao hash armazenado
+        
+        Parâmetros:
+         - senha_digitada: senha em texto plano (string)
+         - senha_hash: hash armazenado no bano (bytes ou string)
+         
+        Retorna:
+         - True se a senha está correta
+         - False se a senha está incorreta
+        """
+        if isinstance(senha_hash, str):
+            senha_hash = senha_hash.encode('utf-8')
+            
+        return bcrypt.checkpw(senha_digitada.encode('utf-8'), senha_hash)
+        
     def cadastrar_usuario(self, username, email, senha, confirma_senha):
+        """
+        Cadastra um novo usuário com senha criptografada
+        """
         self.conecta_db()
         try:
+            # Criptografa as senhas antes de salvar
+            senha_hash = self.criptografar_senha(senha)
+            confirma_senha_hash = self.criptografar_senha(confirma_senha)
+            
             self.cursor.execute("""
                 INSERT INTO Usuarios (Username, Email, Senha, Confirma_senha)
                 VALUES (?,?,?,?)                
-                """, (username, email, senha, confirma_senha))
+                """, (username, email, senha_hash, confirma_senha_hash))
             
             self.conn.commit()
             self.desconecta_db()
@@ -80,18 +120,28 @@ class Database:
             return False, f"Erro ao cadastrar: {str(e)}"
         
     def verificar_login(self, username, senha):
+        """
+        Verifica login comparando senha criptografada
+        """
         self.conecta_db()
         try:
+            # Busca APENAS a senha do usuário
             self.cursor.execute("""
-                SELECT * FROM Usuarios
-                WHERE Username = ? AND Senha = ?               
-            """, (username, senha))
+                SELECT Senha FROM Usuarios
+                WHERE Username = ?               
+            """, (username,))
             
             resultado = self.cursor.fetchone()
             self.desconecta_db()
             
             if resultado:
-                return True, "Login realizado com sucesso!"
+                senha_hash = resultado[0]
+                
+                # Verifica se a senha digitada corresponde ao hash
+                if self.verificar_senha(senha, senha_hash):
+                    return True, "Login realizado com sucesso!"
+                else:
+                    return False, "Usuário ou senha incorretos!"
             else:
                 return False, "Usuário ou senha incorretos!"
         except Exception as e:
