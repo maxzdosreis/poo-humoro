@@ -143,17 +143,23 @@ class Calendario(window):
             event_fg = event['foreground']
 
         self.new_event = {
-        'title': mood,
         'date': datetime.today(),
+        'title': mood,
         'tag': "Humor",
         'background': moodCor,
         'foreground': moodLetra
         }
 
+        event_date = self.new_event['date']
+        event_title = self.new_event['title']
+        event_tag = self.new_event['tag']
+        event_bg = self.new_event['background']
+        event_fg = self.new_event['foreground']
+
         events_list.append(self.new_event)
 
-        Calendar.calevent_create(date = event_date, text = event_title, tags = (event_tag))
-        Calendar.tag_config(event_tag, background = event_bg, foreground = event_fg)
+        Calendar.calevent_create(self, date = event_date, text = event_title, tags = (event_tag))
+        Calendar.tag_config(self, event_tag, background = event_bg, foreground = event_fg)
 
         self.save_events(events, filename = "events.json")
 
