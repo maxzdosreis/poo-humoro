@@ -5,11 +5,10 @@ from datetime import datetime
 import json
 
 serializable_events = []
-events = []
 events_list = []
 
 class window(tk.Frame):
-    def _innit_(self, root, name: str, sizeH: int, sizeW: int):
+    def _init_(self, root, name: str, sizeH: int, sizeW: int):
         self.root = root
         self.window_name = name
         self.sizeH = sizeH
@@ -36,12 +35,17 @@ class window(tk.Frame):
         self.root.geometry(f"{self.sizeH}x{self.sizeW}+{center_x}+{center_y}")
 
 class Calendario(window):
+    def _init_(self, root, name: str, sizeH: int, sizeW: int):
+        super()._init_( root, name, sizeH, sizeW)
+        self.cal = None
+        self.events = []
+
     def show_day_view(self):
         #"""Displays the current day."""#
         for widget in self.root.winfo_children():
             widget.destroy()  # Clear previous widgets
 
-        current_date = datetime.now().strftime("%A, %B %d, %Y")
+        current_date = datetime.now().strftime("%A, %d de %B de %Y")
         day_label = ttk.Label(self.root, text=f"Hoje é: {current_date}", font=("Arial", 16))
         day_label.pack(pady=20)
 
@@ -56,18 +60,18 @@ class Calendario(window):
         for widget in self.root.winfo_children():
             widget.destroy()  # Clear previous widgets
 
-        cal = Calendar(self.root, selectmode='day', year=datetime.now().year, month=datetime.now().month, day=datetime.now().day)
-        cal.pack(pady=20)
+        self.cal = Calendar(self.root, selectmode='day', year=datetime.now().year, month=datetime.now().month, day=datetime.now().day)
+        self.cal.pack(pady=20)
 
         self.load_events()
-        self.display_events_on_calendar(events)
+        self.display_events_on_calendar()
 
         day_button = ttk.Button(self.root, text="Mostrar Dia Atual", command = lambda: self.show_day_view())
         day_button.pack(pady = 10)
 
         # Optional: Add a button to get selected date from calendar
         def get_selected_date():
-            selected_date = cal.get_date()
+            selected_date = self.cal.get_date()
             date_label.config(text=f"Data Selecionada: {selected_date}")
 
         select_button = ttk.Button(self.root, text = "Pegar Data Selecionada", command = get_selected_date)
@@ -75,97 +79,44 @@ class Calendario(window):
         date_label = ttk.Label(self.root, text = "Data Selecionada: None")
         date_label.pack(pady = 5)
 
-    def New_event(self, events):
+    def New_event(self):
     
-        moodNum = int(self.input)
+        moodNum = int(self.mood_input)
 
-        match moodNum:
-            case 1:
-                mood = "Muito Mal"
-                moodCor = "red"
-                moodLetra = "yellow"
-        
-            case 2:
-                mood = "teste"
-                moodCor = "teste"
-                moodLetra = "teste"
+        mood_config = {
+            1: ("Muito Mal", "red", "yellow"),
+            2: ("Mal", "orange", "black"),
+            3: ("Desconfortável", "darkorange", "white"),
+            4: ("Abaixo da Média", "gold", "black"),
+            5: ("Neutro", "gray", "white"),
+            6: ("Acima da Média", "lightblue", "black"),
+            7: ("Bem", "skyblue", "black"),
+            8: ("Muito Bem", "lightgreen", "black"),
+            9: ("Ótimo", "limegreen", "white"),
+            10: ("Excelente", "green", "white")
+        }
 
-            case 3:
-                mood = "teste"
-                moodCor = "teste"
-                moodLetra = "teste"
-        
-            case 4:
-                mood = "teste"
-                moodCor = "teste"
-                moodLetra = "teste"
-        
-            case 5:
-                mood = "teste"
-                moodCor = "teste"
-                moodLetra = "teste"
-        
-            case 6:
-                mood = "teste"
-                moodCor = "teste"
-                moodLetra = "teste"
-        
-            case 7:
-                mood = "teste"
-                moodCor = "teste"
-                moodLetra = "teste"
+        mood, moodCor, moodLetra = mood_config.get(moodNum, ("Indefinido", "White", "Black"))
 
-            case 8:
-                mood = "teste"
-                moodCor = "teste"
-                moodLetra = "teste"
-        
-            case 9:
-                mood = "teste"
-                moodCor = "teste"
-                moodLetra = "teste"
-            
-            case 10:
-                mood = "Muito Bom"
-                moodCor = "green"
-                moodLetra = "white"
-            
-            case _:
-                mood = "teste"
-                moodCor = "teste"
-                moodLetra = "teste"
-
-        for event in events:
-            event_date = event['date']
-            event_title = event['title']
-            event_tag = event['tag']
-            event_bg = event['background']
-            event_fg = event['foreground']#faz alguma coisa?#
-
-        self.new_event = {
-        'date': datetime.today(),
+        new_event = {
+        'date': datetime.today().date(),
         'title': mood,
         'tag': "Humor",
         'background': moodCor,
         'foreground': moodLetra
         }
 
-        event_date = self.new_event['date']
-        event_title = self.new_event['title']
-        event_tag = self.new_event['tag']
-        event_bg = self.new_event['background']
-        event_fg = self.new_event['foreground']
+        self.events.append(new_event)
 
-        events_list.append(self.new_event)
+        if self.cal:
+            self.cal.calevent_create(date = new_event['date'], title = new_event['title'], tag = new_event['tag'])
+            self.cal.tag_config(new_event['tag'], background = new_event['background'], foreground = new_event['foreground'])
 
-        Calendar.calevent_create(self, date = event_date, text = event_title, tags = (event_tag))
-        Calendar.tag_config(self, event_tag, background = event_bg, foreground = event_fg)
+        self.save_events()
 
-        self.save_events(events, filename = "events.json")
-
-    def save_events(self, events, filename="events.json"):
+    def save_events(self, filename = "events.json"):
         # Convert datetime objects to string for JSON serialization
-        for event in events:
+        for event in self.events:
             serializable_event = event.copy()
             serializable_event['date'] = event['date'].strftime('%Y-%m-%d')
             serializable_events.append(serializable_event)
@@ -177,17 +128,22 @@ class Calendario(window):
         try:
             with open(filename, 'r') as f:
                 serializable_events = json.load(f)
-            
+
+            self.events = []            
             for event_data in serializable_events:
                 event_data['date'] = datetime.strptime(event_data['date'], '%Y-%m-%d').date()
-                events.append(event_data)
-            return events
+                self.events.append(event_data)
+            return self.events
         except FileNotFoundError:
-            return []
+            self.events = []
 
-    def display_events_on_calendar(self, events):
-        for event in events:
-            Calendar.calevent_create(event['date'], event['description'], event.get('tags', ''))
+    def display_events_on_calendar(self):
+        if not self.cal:
+            return
+        
+        for event in self.events:
+            self.cal.calevent_create(event['date'], event['description'], event.get('tags', ''))
+            self.cal.tag_config(event['tag'], background = ['background'], foreground = ['foreground'])
 
     def QuestionarioHumor(self):
         questionario = tk.Toplevel(self.root)
@@ -201,18 +157,24 @@ class Calendario(window):
         resposta.pack(pady = 10)
 
         def get_input():
-            self.input = resposta.get()
-            self.New_event(events)
-            questionario.destroy()
+            mood_input = resposta.get()
+
+            try:
+               self.New_event(mood_input)
+               questionario.destroy()
+            except ValueError:
+                error_label = ttk.Label(questionario, text = "Por favor, insira um número válido", foreground = "red")
+                error_label.pack(pady = 5)
+
     
-        resposta_button = ttk.Button(questionario, text = "Responder", command = lambda: get_input())
+        resposta_button = ttk.Button(questionario, text = "Responder", command = lambda: get_input)
         resposta_button.pack(pady = 10)
 
 def main():
     root = tk.Tk()
 
     calendarioW = Calendario()
-    calendarioW._innit_(root, "calendarioW", 600, 500)
+    calendarioW._init_(root, "calendarioW", 600, 500)
     calendarioW.create_window("Calendário")
 
     calendarioW.show_day_view()  # Start with the day view#
