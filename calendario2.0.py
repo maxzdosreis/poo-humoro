@@ -140,7 +140,7 @@ class Calendario(window):
             event_title = event['title']
             event_tag = event['tag']
             event_bg = event['background']
-            event_fg = event['foreground']
+            event_fg = event['foreground']#faz alguma coisa?#
 
         self.new_event = {
         'date': datetime.today(),
