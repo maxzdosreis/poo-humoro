@@ -77,7 +77,7 @@ class Calendario(window):
 
     def New_event(self, events):
     
-        moodNum = input
+        moodNum = int(self.input)
 
         match moodNum:
             case 1:
@@ -129,6 +129,11 @@ class Calendario(window):
                 mood = "Muito Bom"
                 moodCor = "green"
                 moodLetra = "white"
+            
+            case _:
+                mood = "teste"
+                moodCor = "teste"
+                moodLetra = "teste"
 
         for event in events:
             event_date = event['date']
@@ -147,8 +152,8 @@ class Calendario(window):
 
         events_list.append(self.new_event)
 
-        self.new_event.calevent_create(date=event_date, text=event_title, tags=(event_tag,))
-        self.new_event.tag_config(event_tag, background=event_bg, foreground=event_fg)
+        Calendar.calevent_create(date = event_date, text = event_title, tags = (event_tag))
+        Calendar.tag_config(event_tag, background = event_bg, foreground = event_fg)
 
         self.save_events(events, filename = "events.json")
 
@@ -176,7 +181,7 @@ class Calendario(window):
 
     def display_events_on_calendar(self, events):
         for event in events:
-            self.new_event.calevent_create(event['date'], event['description'], event.get('tags', ''))
+            Calendar.calevent_create(event['date'], event['description'], event.get('tags', ''))
 
     def QuestionarioHumor(self):
         questionario = tk.Toplevel(self.root)
@@ -190,7 +195,7 @@ class Calendario(window):
         resposta.pack(pady = 10)
 
         def get_input():
-            input = resposta.get()
+            self.input = resposta.get()
             self.New_event(events)
             questionario.destroy()
     
