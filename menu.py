@@ -55,39 +55,16 @@ class MenuApp(ctk.CTkToplevel):
         self.frame_botoes = ctk.CTkFrame(self.frame_menu, fg_color="transparent")
         self.frame_botoes.pack(pady=10)
         
-        # Coluna 1
         self.btn_tela1 = ctk.CTkButton(
-            self.frame_botoes,
-            width=300,
-            height=50,
-            text="Opção 1".upper(),
-            font=("Century Gothic Bold", 14),
-            corner_radius=15,
-            command=self.abrir_tela1
+         self.frame_botoes,
+         width=300,
+         height=50,
+         text="Timeline do Humor".upper(),
+         font=("Century Gothic Bold", 14),
+         corner_radius=15,
+         command=self.abrir_timeline
         )
-        self.btn_tela1.grid(row=0, column=0, padx=15, pady=10)
-        
-        self.btn_tela2 = ctk.CTkButton(
-            self.frame_botoes,
-            width=300,
-            height=50,
-            text="Opção 2".upper(),
-            font=("Century Gothic Bold", 14),
-            corner_radius=15,
-            command=self.abrir_tela2
-        )
-        self.btn_tela2.grid(row=1, column=0, padx=15, pady=10)
-        
-        self.btn_tela3 = ctk.CTkButton(
-            self.frame_botoes,
-            width=300,
-            height=50,
-            text="Opção 3".upper(),
-            font=("Century Gothic Bold", 14),
-            corner_radius=15,
-            command=self.abrir_tela3
-        )
-        self.btn_tela3.grid(row=2, column=0, padx=15, pady=10)
+
         
         # Coluna 2
         self.btn_tela4 = ctk.CTkButton(
@@ -150,3 +127,6 @@ class MenuApp(ctk.CTkToplevel):
         # Fecha tudo
         self.parent.destroy()
         self.destroy()
+    def abrir_timeline(self):
+        import timeline
+        timeline.TimelineApp(self, self.username)

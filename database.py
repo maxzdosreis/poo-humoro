@@ -19,17 +19,30 @@ class Database:
                    
     def cria_tabelas(self):
         self.conecta_db()
+
+        # Tabela Usuarios
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS Usuarios(
-               Id INTEGER PRIMARY KEY AUTOINCREMENT,
-               Username TEXT NOT NULL,
-               Email TEXT NOT NULL,
-               Senha TEXT NOT NULL,
-               Confirma_senha TEXT NOT NULL
-           );                 
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Username TEXT NOT NULL,
+                Email TEXT NOT NULL,
+                Senha TEXT NOT NULL,
+                Confirma_senha TEXT NOT NULL
+            );
         """)
+
+        # Tabela Humores
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS Humores(
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Username TEXT NOT NULL,
+                Humor TEXT NOT NULL,
+                Data TEXT NOT NULL
+            );
+        """)
+
         self.conn.commit()
-        print("Tabela criada com sucesso!")
+        print("Tabelas criadas com sucesso!")
         self.desconecta_db()
         
     def cadastrar_usuario(self, username, email, senha, confirma_senha):
@@ -68,3 +81,32 @@ class Database:
         except Exception as e:
             self.desconecta_db()
             return False, f"Erro ao fazer login: {str(e)}"
+
+    def salvar_humor(self, username, humor, data):
+        self.conecta_db()
+        try:
+            self.cursor.execute("""
+            INSERT INTO Humores (Username, Humor, Data)
+            VALUES (?, ?, ?)
+            """, (username, humor, data))
+            self.conn.commit()
+            self.desconecta_db()
+            return True, "Humor registrado!"
+        except Exception as e:
+            self.desconecta_db()
+            return False, f"Erro ao salvar humor: {str(e)}"
+
+    def listar_humores(self, username):
+        self.conecta_db()
+        try:
+            self.cursor.execute("""
+              SELECT Humor, Data FROM Humores
+              WHERE Username = ?
+              ORDER BY Id DESC
+             """, (username,))
+            resultado = self.cursor.fetchall()
+            self.desconecta_db()
+            return resultado
+        except Exception as e:
+            self.desconecta_db()
+            return []
