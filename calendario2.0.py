@@ -160,11 +160,16 @@ class Calendario(window):
             mood_input = resposta.get()
 
             try:
-               self.New_event(mood_input)
-               questionario.destroy()
+               mood_num = int(mood_input)
+               if 1 <= mood_num <= 10:
+                    self.New_event(mood_input)
+                    questionario.destroy()
+
             except ValueError:
                 error_label = ttk.Label(questionario, text = "Por favor, insira um número válido", foreground = "red")
                 error_label.pack(pady = 5)
+            
+            resposta.bind('<Return>', lambda e: get_input())
 
     
         resposta_button = ttk.Button(questionario, text = "Responder", command = lambda: get_input)
