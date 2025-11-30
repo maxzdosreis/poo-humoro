@@ -21,18 +21,28 @@ class Database:
                    
     def cria_tabelas(self):
         self.conecta_db()
-        
-        # Tabela de usuários
+
+        # Tabela Usuarios
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS Usuarios(
-               Id INTEGER PRIMARY KEY AUTOINCREMENT,
-               Username TEXT NOT NULL,
-               Email TEXT NOT NULL,
-               Senha TEXT NOT NULL,
-               Confirma_senha TEXT NOT NULL
-           );                 
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Username TEXT NOT NULL,
+                Email TEXT NOT NULL,
+                Senha TEXT NOT NULL,
+                Confirma_senha TEXT NOT NULL
+            );
         """)
-        
+  
+        # Tabela Humores
+        #self.cursor.execute("""
+            #CREATE TABLE IF NOT EXISTS Humores(
+                #Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                #Username TEXT NOT NULL,
+                #Humor TEXT NOT NULL,
+                #Data TEXT NOT NULL
+            #);
+        #""")
+    
         # Tabela de Questionários
         """
         Query que cria a tabela no banco de dados
@@ -248,3 +258,27 @@ class Database:
         except Exception as e:
             self.desconecta_db()
             return False, f"Erro ao atualizar questionário: {str(e)}"
+        
+    def listar_questionarios(self,username):
+        """
+        Lista todos os questionários de um usuário ordenados por data
+        
+        Retorna:
+         - Lista de tuplas (Data, Hora, Humor, Sono, Social, Lazer) 
+        """
+        self.conecta_db()
+        try:
+            self.cursor.execute("""
+                SELECT Data, Hora, Humor, Sono, Social, Lazer
+                FROM Questionarios
+                WHERE Username = ?
+                ORDER BY Data DESC, Hora DESC
+            """, (username,))
+            
+            resultado = self.cursor.fetchall()
+            self.desconecta_db()
+            return resultado
+        except Exception as e:
+            self.desconecta_db()
+            print(f"Erro ao listar questionários: {str(e)}")
+            return []
