@@ -2,8 +2,29 @@
     {
         "date": "2025-11-29",
         "title": "Muito Mal",
-        "tag": "Humor",
+        "tag": "Muito Mal",
         "background": "red",
         "foreground": "yellow"
+    },
+    {
+        "date": "2025-11-03",
+        "title": "Bem",
+        "tag": "Bem",
+        "background": "skyblue",
+        "foreground": "black"
+    },
+    {
+        "date": "2025-11-30",
+        "title": "Excelente",
+        "tag": "Excelente",
+        "background": "green",
+        "foreground": "white"
+    },
+    {
+        "date": "2025-11-30",
+        "title": "Abaixo da M\u00e9dia",
+        "tag": "Abaixo da M\u00e9dia",
+        "background": "gold",
+        "foreground": "black"
     }
 ]

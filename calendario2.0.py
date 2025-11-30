@@ -43,9 +43,13 @@ class Calendario(window):
         for widget in self.root.winfo_children():
             widget.destroy()  # Clear previous widgets
 
-        current_date = datetime.now().strftime("%A, %d de %B de %Y")
+        current_date = datetime.now().strftime(f"%A, %d de %B de %Y")
         day_label = ttk.Label(self.root, text=f"Hoje é: {current_date}", font=("Arial", 16))
         day_label.pack(pady=20)
+
+        with open("events.json", "r") as f:
+            teste = []
+            teste = json.load(f)
 
         month_button = ttk.Button(self.root, text = "Mostrar Mês Inteiro", command = lambda: self.show_month_view())
         month_button.pack(pady = 10)
@@ -53,15 +57,37 @@ class Calendario(window):
         mood_button = ttk.Button(self.root, text = "Defina Seu Humor Hoje", command = lambda: self.QuestionarioHumor())
         mood_button.pack(pady = 10)
 
+        self.load_events()
+
+        frame = ttk.Frame(self.root, padding = 10)
+        frame.pack(fill = tk.BOTH, expand = True)
+
+        canva = tk.Canvas(frame, bg = "white", highlightthickness = 0)
+        canva.pack(fill = tk.BOTH, expand = True)
+
+        circle_center_x = 285
+        circle_center_y = 150
+        circle_radius = 100
+        for event in self.events:
+            if event.get('date') == datetime.today().date():
+                circle_color = event.get('background', '')
+
+        def create_circle(canva, x, y, r, **Kwargs):
+            return canva.create_oval(x - r, y - r, x + r, y + r, **Kwargs)
+        
+        create_circle(canva, circle_center_x, circle_center_y, circle_radius, fill = circle_color, outline = "")
+
+
     def show_month_view(self):
         #"""Displays the full month calendar."""#
         for widget in self.root.winfo_children():
             widget.destroy()  # Clear previous widgets
+        
+        self.load_events()
 
         self.cal = Calendar(self.root, selectmode='day', year=datetime.now().year, month=datetime.now().month, day=datetime.now().day)
         self.cal.pack(pady=20)
 
-        self.load_events()
         self.display_events_on_calendar()
 
         day_button = ttk.Button(self.root, text="Mostrar Dia Atual", command = lambda: self.show_day_view())
@@ -99,26 +125,36 @@ class Calendario(window):
         new_event = {
         'date': datetime.today().date(),
         'title': mood,
-        'tag': "Humor",
+        'tag': mood,
         'background': moodCor,
         'foreground': moodLetra
         }
-
-        self.events.append(new_event)
-
-        if self.cal:
-            self.cal.calevent_create(date = new_event.get('date', ''), text = new_event.get('title', ''), tags = new_event.get('tag', ''))
-            self.cal.tag_config(new_event.get('tag', ''), background = new_event.get('background', ''), foreground = new_event.get('foreground', ''))
-
+        
+        verify = datetime.today().date()
+    
+        if verify not in self.events:
+            self.events.append(new_event)
+        else:
+            self.events["date": verify] = new_event
+    
         self.save_events(filename= "events.json")
 
     def save_events(self, filename = "events.json"):
         # Convert datetime objects to string for JSON serialization
-        self.serializable_events = []
+        try:
+            with open(filename, "r") as f:
+                self.serializable_events = json.load(f)
+        except FileNotFoundError:
+                self.serializable_events = []
+
         for event in self.events:
             serializable_event = event.copy()
-            serializable_event['date'] = event['date'].strftime('%Y-%m-%d')
-            self.serializable_events.append(serializable_event)
+            try:
+                serializable_event['date'] = event['date'].strftime('%Y-%m-%d')
+            except AttributeError:
+                serializable_event['date'] = event['date']
+            if serializable_event not in self.serializable_events:
+                self.serializable_events.append(serializable_event)
 
         try:
             with open(filename, 'w') as f:
@@ -131,8 +167,7 @@ class Calendario(window):
         try:
             with open(filename, 'r') as f:
                 self.serializable_events = json.load(f)
-
-            self.events = []            
+          
             for event_data in self.serializable_events:
                 event_data['date'] = datetime.strptime(event_data['date'], '%Y-%m-%d').date()
                 self.events.append(event_data)
@@ -145,8 +180,11 @@ class Calendario(window):
             return
         
         for event in self.events:
-            self.cal.calevent_create(event.get('date', ''), event.get('description', ''), event.get('tags', ''))
-            self.cal.tag_config(event.get('tag', ''), background = event.get('background', ''), foreground = event.get('foreground', ''))
+            if self.cal:
+                self.cal.calevent_create(event.get('date', ''), event.get('description', ''), event.get('tag', ''))
+                self.cal.tag_config(event.get('tag', ''), background = event.get('background', ''), foreground = event.get('foreground', ''))
+            else:
+                print("algo deu errado")
 
     def QuestionarioHumor(self):
         questionario = tk.Toplevel(self.root)
