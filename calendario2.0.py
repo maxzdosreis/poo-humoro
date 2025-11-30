@@ -47,15 +47,14 @@ class Calendario(window):
         day_label = ttk.Label(self.root, text=f"Hoje é: {current_date}", font=("Arial", 16))
         day_label.pack(pady=20)
 
-        with open("events.json", "r") as f:
-            teste = []
-            teste = json.load(f)
-
         month_button = ttk.Button(self.root, text = "Mostrar Mês Inteiro", command = lambda: self.show_month_view())
         month_button.pack(pady = 10)
 
         mood_button = ttk.Button(self.root, text = "Defina Seu Humor Hoje", command = lambda: self.QuestionarioHumor())
         mood_button.pack(pady = 10)
+
+        menu_button = ttk.Button(self.root, text = "Menu")
+        menu_button.pack(pady = 10)
 
         self.load_events()
 
