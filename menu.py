@@ -55,16 +55,40 @@ class MenuApp(ctk.CTkToplevel):
         self.frame_botoes = ctk.CTkFrame(self.frame_menu, fg_color="transparent")
         self.frame_botoes.pack(pady=10)
         
+        # Questionário
         self.btn_tela1 = ctk.CTkButton(
-         self.frame_botoes,
-         width=300,
-         height=50,
-         text="Timeline do Humor".upper(),
-         font=("Century Gothic Bold", 14),
-         corner_radius=15,
-         command=self.abrir_timeline
+            self.frame_botoes,
+            width=300,
+            height=50,
+            text="Questionário".upper(),
+            font=("Century Gothic Bold", 14),
+            corner_radius=15,
+            command=self.abrir_tela1
         )
-
+        self.btn_tela1.grid(row=0, column=0, padx=15, pady=10)
+        
+        # Timeline
+        self.btn_tela2 = ctk.CTkButton(
+            self.frame_botoes,
+            width=300,
+            height=50,
+            text="Timeline do Humor".upper(),
+            font=("Century Gothic Bold", 14),
+            corner_radius=15,
+            command=self.abrir_tela2
+        )
+        self.btn_tela2.grid(row=1, column=0, padx=15, pady=10)
+        
+        self.btn_tela3 = ctk.CTkButton(
+            self.frame_botoes,
+            width=300,
+            height=50,
+            text="Opção 3".upper(),
+            font=("Century Gothic Bold", 14),
+            corner_radius=15,
+            command=self.abrir_tela3
+        )
+        self.btn_tela3.grid(row=2, column=0, padx=15, pady=10)
         
         # Coluna 2
         self.btn_tela4 = ctk.CTkButton(
@@ -103,10 +127,12 @@ class MenuApp(ctk.CTkToplevel):
         self.btn_sair.grid(row=2, column=1, padx=15, pady=10)
         
     def abrir_tela1(self):
-        messagebox.showinfo("Menu", "Tela 1 ainda não implementada!")
+        import questionario
+        questionario.Questionario(self, self.username)
     
     def abrir_tela2(self):
-        messagebox.showinfo("Menu", "Tela 2 ainda não implementada!")
+        import timeline
+        timeline.TimelineApp(self, self.username)
     
     def abrir_tela3(self):
         messagebox.showinfo("Menu", "Tela 3 ainda não implementada!")
@@ -124,9 +150,7 @@ class MenuApp(ctk.CTkToplevel):
         self.parent.deiconify()
     
     def fechar_aplicacao(self):
-        # Fecha tudo
-        self.parent.destroy()
-        self.destroy()
-    def abrir_timeline(self):
-        import timeline
-        timeline.TimelineApp(self, self.username)
+        try:
+            self.parent.destroy()
+        except:
+            pass
