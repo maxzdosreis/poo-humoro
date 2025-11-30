@@ -4,8 +4,6 @@ from tkcalendar import Calendar
 from datetime import datetime
 import json
 
-serializable_events = []
-events_list = []
 
 class window(tk.Frame):
     def _init_(self, root, name: str, sizeH: int, sizeW: int):
@@ -109,28 +107,33 @@ class Calendario(window):
         self.events.append(new_event)
 
         if self.cal:
-            self.cal.calevent_create(date = new_event['date'], title = new_event['title'], tag = new_event['tag'])
-            self.cal.tag_config(new_event['tag'], background = new_event['background'], foreground = new_event['foreground'])
+            self.cal.calevent_create(date = new_event.get('date', ''), text = new_event.get('title', ''), tags = new_event.get('tag', ''))
+            self.cal.tag_config(new_event.get('tag', ''), background = new_event.get('background', ''), foreground = new_event.get('foreground', ''))
 
-        self.save_events()
+        self.save_events(filename= "events.json")
 
     def save_events(self, filename = "events.json"):
         # Convert datetime objects to string for JSON serialization
+        self.serializable_events = []
         for event in self.events:
             serializable_event = event.copy()
             serializable_event['date'] = event['date'].strftime('%Y-%m-%d')
-            serializable_events.append(serializable_event)
+            self.serializable_events.append(serializable_event)
 
-        with open(filename, 'w') as f:
-            json.dump(serializable_events, f, indent=4)
+        try:
+            with open(filename, 'w') as f:
+                json.dump(self.serializable_events, f, indent=4)
+
+        except json.JSONDecodeError:
+            self.serializable_events = []
 
     def load_events(self, filename="events.json"):
         try:
             with open(filename, 'r') as f:
-                serializable_events = json.load(f)
+                self.serializable_events = json.load(f)
 
             self.events = []            
-            for event_data in serializable_events:
+            for event_data in self.serializable_events:
                 event_data['date'] = datetime.strptime(event_data['date'], '%Y-%m-%d').date()
                 self.events.append(event_data)
             return self.events
@@ -142,8 +145,8 @@ class Calendario(window):
             return
         
         for event in self.events:
-            self.cal.calevent_create(event['date'], event['description'], event.get('tags', ''))
-            self.cal.tag_config(event['tag'], background = ['background'], foreground = ['foreground'])
+            self.cal.calevent_create(event.get('date', ''), event.get('description', ''), event.get('tags', ''))
+            self.cal.tag_config(event.get('tag', ''), background = event.get('background', ''), foreground = event.get('foreground', ''))
 
     def QuestionarioHumor(self):
         questionario = tk.Toplevel(self.root)
@@ -156,24 +159,26 @@ class Calendario(window):
         resposta = ttk.Entry(questionario, width = 10)
         resposta.pack(pady = 10)
 
+        resposta_button = ttk.Button(questionario, text = "Responder", command = lambda: get_input())
+        resposta_button.pack(pady = 10)
+
+        resposta.bind('<Return>', lambda e: get_input())
+
+
         def get_input():
-            mood_input = resposta.get()
+            self.mood_input = resposta.get()
 
             try:
-               mood_num = int(mood_input)
+               print("teste")
+               mood_num = int(self.mood_input)
                if 1 <= mood_num <= 10:
-                    self.New_event(mood_input)
+                    self.New_event()
                     questionario.destroy()
 
             except ValueError:
                 error_label = ttk.Label(questionario, text = "Por favor, insira um número válido", foreground = "red")
                 error_label.pack(pady = 5)
-            
-            resposta.bind('<Return>', lambda e: get_input())
 
-    
-        resposta_button = ttk.Button(questionario, text = "Responder", command = lambda: get_input)
-        resposta_button.pack(pady = 10)
 
 def main():
     root = tk.Tk()
