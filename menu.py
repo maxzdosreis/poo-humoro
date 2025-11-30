@@ -95,7 +95,7 @@ class MenuApp(ctk.CTkToplevel):
             self.frame_botoes,
             width=300,
             height=50,
-            text="Opção 4".upper(),
+            text="Mapa Emocional".upper(),
             font=("Century Gothic Bold", 14),
             corner_radius=15,
             command=self.abrir_tela4
@@ -138,7 +138,8 @@ class MenuApp(ctk.CTkToplevel):
         messagebox.showinfo("Menu", "Tela 3 ainda não implementada!")
     
     def abrir_tela4(self):
-        messagebox.showinfo("Menu", "Tela 4 ainda não implementada!")
+        import mapa
+        mapa.Mapa(self, self.username)
     
     def abrir_tela5(self):
         messagebox.showinfo("Menu", "Tela 5 ainda não implementada!")
