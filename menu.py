@@ -83,7 +83,7 @@ class MenuApp(ctk.CTkToplevel):
             self.frame_botoes,
             width=300,
             height=50,
-            text="Calendário".upper(),
+            text="Calendário de Sono".upper(),
             font=("Century Gothic Bold", 14),
             corner_radius=15,
             command=self.abrir_tela3
@@ -95,7 +95,7 @@ class MenuApp(ctk.CTkToplevel):
             self.frame_botoes,
             width=300,
             height=50,
-            text="Opção 4".upper(),
+            text="Mapa Emocional".upper(),
             font=("Century Gothic Bold", 14),
             corner_radius=15,
             command=self.abrir_tela4
@@ -106,7 +106,7 @@ class MenuApp(ctk.CTkToplevel):
             self.frame_botoes,
             width=300,
             height=50,
-            text="Opção 5".upper(),
+            text="Sugestões de Bem-Estar".upper(),
             font=("Century Gothic Bold", 14),
             corner_radius=15,
             command=self.abrir_tela5
@@ -135,14 +135,16 @@ class MenuApp(ctk.CTkToplevel):
         timeline.TimelineApp(self, self.username)
     
     def abrir_tela3(self):
-        import calendario2_0
-        calendario2_0.Calendario(self, self.username)
+        from calendario import CalendarioApp
+        CalendarioApp(self, self.username)
     
     def abrir_tela4(self):
-        messagebox.showinfo("Menu", "Tela 4 ainda não implementada")
+        import mapa
+        mapa.Mapa(self, self.username)
     
     def abrir_tela5(self):
-        messagebox.showinfo("Menu", "Tela 5 ainda não implementada!")
+        from sugestoes import SugestoesApp
+        SugestoesApp(self, self.username)
     
     def voltar_login(self):
         # Fecha o menu
