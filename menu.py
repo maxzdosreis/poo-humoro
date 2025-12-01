@@ -106,7 +106,7 @@ class MenuApp(ctk.CTkToplevel):
             self.frame_botoes,
             width=300,
             height=50,
-            text="Opção 5".upper(),
+            text="Sugestões de Bem-Estar".upper(),
             font=("Century Gothic Bold", 14),
             corner_radius=15,
             command=self.abrir_tela5
@@ -143,7 +143,8 @@ class MenuApp(ctk.CTkToplevel):
         mapa.Mapa(self, self.username)
     
     def abrir_tela5(self):
-        messagebox.showinfo("Menu", "Tela 5 ainda não implementada!")
+        from sugestoes import SugestoesApp
+        SugestoesApp(self, self.username)
     
     def voltar_login(self):
         # Fecha o menu
