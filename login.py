@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
-import sqlite3 
+import sqlite3 #não é acessado?#
 from tkinter import messagebox
 from database import Database
 
