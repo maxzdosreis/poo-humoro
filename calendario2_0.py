@@ -6,7 +6,7 @@ from datetime import datetime
 from database import Database
 
 
-class window(ctk.CTkToplevel):
+class Calendario(ctk.CTkToplevel):
     def _init_(self, parent, username):
         super()._init_(parent)
         self.window_name = "calendarioW"
@@ -15,13 +15,19 @@ class window(ctk.CTkToplevel):
         self.parent = parent
         self.username = username
         self.database = Database()
+
+        self.create_window()
+        self.show_day_view()
+        self.lift()
+        self.focus_force()
+        self.grab_set()
     
     def centering(self):
         window_height = self.sizeH
         window_width = self.sizeW
 
-        screen_width = window.winfo_screenwidth()
-        screen_height = window.winfo_screenheight()
+        screen_width = Calendario.winfo_screenwidth()
+        screen_height = Calendario.winfo_screenheight()
 
         # Calcula a posição central
         center_x = int((screen_width / 2) - (window_width / 2))
@@ -29,21 +35,16 @@ class window(ctk.CTkToplevel):
 
         return center_x, center_y
 
-    def create_window(self, titulo: str):
-        self.titulo = titulo
+    def create_window(self):
+        self.window_title = "Calendário"
+        self.sizeH = 600
+        self.sizeW = 500
 
-        window.title(f"{self.titulo}")
+        Calendario.title(f"{self.window_title}")
         center_x, center_y = self.centering()
-        window.geometry(f"{self.sizeH}x{self.sizeW}+{center_x}+{center_y}")
-
-class Calendario(window):
-    def _init_(self, parent):
-        super()._init_(parent)
+        Calendario.geometry(f"{self.sizeH}x{self.sizeW}+{center_x}+{center_y}")
         self.cal = None
         self.events = []
-
-        self.create_window("Calendário")
-        self.show_day_view()
 
     def show_day_view(self):
         #"""Displays the current day."""#
@@ -51,14 +52,14 @@ class Calendario(window):
             widget.destroy()  # Clear previous widgets
 
         current_date = datetime.now().strftime(f"%A, %d de %B de %Y")
-        day_label = ttk.Label(Calendario, text=f"Hoje é: {current_date}", font=("Arial", 16))
+        day_label = ctk.CTkLabel(Calendario, text=f"Hoje é: {current_date}", font=("Arial", 16))
         day_label.pack(pady=20)
 
-        month_button = ttk.Button(Calendario, text = "Mostrar Mês Inteiro", command = lambda: self.show_month_view())
-        month_button.pack(pady = 10)
+        month_button = ctk.CTkButton(Calendario, width = 300, height = 45, corner_radius = 15, text = "Mostrar Mês Inteiro", font = ("Ariel", 15), fg_color = "#1f538d", hover_color = "#14375e", command = lambda: self.show_month_view())
+        month_button.pack(pady = 15)
 
-        menu_button = ttk.Button(Calendario, text = "Menu", command = lambda: self.fecharCal())
-        menu_button.pack(pady = 10)
+        menu_button = ctk.CTkButton(Calendario, width = 300, height = 45, corner_radius = 15, text = "Menu", font=("Arial", 16), fg_color = "#1f538d", hover_color = "#14375e", command = lambda: self.fecharCal())
+        menu_button.pack(pady = 15)
 
         self.get_humor()
         for event in self.events:
@@ -67,10 +68,10 @@ class Calendario(window):
                 moodL = event.get('title', '')
     
 
-        mood_label = ttk.Label(Calendario, text = f"O Humor de Hoje é: {moodL}")
-        mood_label.pack(pady = 10)
+        mood_label = ctk.CTkLabel(Calendario, text = f"O Humor de Hoje é: {moodL}")
+        mood_label.pack(pady = 20)
 
-        frame = ttk.Frame(Calendario, padding = 10)
+        frame = ctk.CTkFrame(Calendario, padding = 10)
         frame.pack(fill = tk.BOTH, expand = True)
 
         canva = tk.Canvas(frame, bg = "white", highlightthickness = 0)
@@ -98,7 +99,7 @@ class Calendario(window):
 
         self.display_events_on_calendar()
 
-        day_button = ttk.Button(Calendario, text="Mostrar Dia Atual", command = lambda: self.show_day_view())
+        day_button = ctk.CTkButton(Calendario, width = 400, height = 45, corner_radius = 15, text="Mostrar Dia Atual", font = ("Ariel", 15), fg_color = "#1f538d", hover_color = "#14375e", command = lambda: self.show_day_view())
         day_button.pack(pady = 10)
 
         # Optional: Add a button to get selected date from calendar
@@ -106,9 +107,10 @@ class Calendario(window):
             selected_date = self.cal.get_date()
             date_label.config(text=f"Data Selecionada: {selected_date}")
 
-        select_button = ttk.Button(Calendario, text = "Pegar Data Selecionada", command = get_selected_date)
+        select_button = ctk.CTkButton(Calendario, widht = 400, heigth = 45, corner_radius = 15, text = "Pegar Data Selecionada", font = ("Ariel", 15), fg_color = "#1f538d", hover_color = "#14375e", command = get_selected_date)
         select_button.pack(pady = 5)
-        date_label = ttk.Label(Calendario, text = "Data Selecionada: None")
+
+        date_label = ctk.CTkLabel(Calendario, text = "Data Selecionada: None")
         date_label.pack(pady = 5)
 
     def New_event(self):
