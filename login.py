@@ -172,6 +172,3 @@ class App(ctk.CTk, BackEnd):
         import menu
         menu_window = menu.MenuApp(self, username)
         
-if __name__=="__main__":
-    app = App()
-    app.mainloop()
