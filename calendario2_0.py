@@ -7,27 +7,24 @@ from database import Database
 
 
 class Calendario(ctk.CTkToplevel):
-    def _init_(self, parent, username):
-        super()._init_(parent)
+    def __init__(self, parent, username):
+        super().__init__(parent)
         self.window_name = "calendarioW"
         self.sizeH = 600
-        self.sizeW = 500
+        self.sizeW = 700
         self.parent = parent
         self.username = username
         self.database = Database()
 
         self.create_window()
         self.show_day_view()
-        self.lift()
-        self.focus_force()
-        self.grab_set()
-    
+
     def centering(self):
         window_height = self.sizeH
         window_width = self.sizeW
 
-        screen_width = Calendario.winfo_screenwidth()
-        screen_height = Calendario.winfo_screenheight()
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
 
         # Calcula a posição central
         center_x = int((screen_width / 2) - (window_width / 2))
@@ -40,82 +37,87 @@ class Calendario(ctk.CTkToplevel):
         self.sizeH = 600
         self.sizeW = 500
 
-        Calendario.title(f"{self.window_title}")
+        self.title(f"{self.window_title}")
         center_x, center_y = self.centering()
-        Calendario.geometry(f"{self.sizeH}x{self.sizeW}+{center_x}+{center_y}")
+        self.geometry(f"{self.sizeH}x{self.sizeW}+{center_x}+{center_y}")
         self.cal = None
         self.events = []
 
     def show_day_view(self):
         #"""Displays the current day."""#
-        for widget in Calendario.winfo_children():
-            widget.destroy()  # Clear previous widgets
+        for widget in self.winfo_children():
+            widget.pack_forget()  # Clear previous widgets
 
         current_date = datetime.now().strftime(f"%A, %d de %B de %Y")
-        day_label = ctk.CTkLabel(Calendario, text=f"Hoje é: {current_date}", font=("Arial", 16))
+        day_label = ctk.CTkLabel(self, text=f"Hoje é: {current_date}", font=("Arial", 16))
         day_label.pack(pady=20)
 
-        month_button = ctk.CTkButton(Calendario, width = 300, height = 45, corner_radius = 15, text = "Mostrar Mês Inteiro", font = ("Ariel", 15), fg_color = "#1f538d", hover_color = "#14375e", command = lambda: self.show_month_view())
+        month_button = ctk.CTkButton(self, width = 300, height = 45, corner_radius = 15, text = "Mostrar Mês Inteiro", font = ("Ariel", 15), fg_color = "#1f538d", hover_color = "#14375e", command = lambda: self.show_month_view())
         month_button.pack(pady = 15)
 
-        menu_button = ctk.CTkButton(Calendario, width = 300, height = 45, corner_radius = 15, text = "Menu", font=("Arial", 16), fg_color = "#1f538d", hover_color = "#14375e", command = lambda: self.fecharCal())
+        menu_button = ctk.CTkButton(self, width = 300, height = 45, corner_radius = 15, text = "Menu", font = ("Ariel", 15), fg_color = "#1f538d", hover_color = "#14375e", command = lambda: self.fecharCal())
         menu_button.pack(pady = 15)
+
+        moodL = "Não registrado"
+        circle_color = "lightgray"
 
         self.get_humor()
         for event in self.events:
-            if event.get('date') == datetime.today().date():
+            if event['date'] == datetime.today().date():
                 circle_color = event.get('background', '')
                 moodL = event.get('title', '')
     
 
-        mood_label = ctk.CTkLabel(Calendario, text = f"O Humor de Hoje é: {moodL}")
+        mood_label = ctk.CTkLabel(self, text = f"O Humor de Hoje é: {moodL}")
         mood_label.pack(pady = 20)
 
-        frame = ctk.CTkFrame(Calendario, padding = 10)
-        frame.pack(fill = tk.BOTH, expand = True)
+        frame = ctk.CTkFrame(self, corner_radius = 15, fg_color = "transparent")
+        frame.pack(fill = ctk.BOTH, expand = True, padx = 10, pady = 10)
 
-        canva = tk.Canvas(frame, bg = "white", highlightthickness = 0)
-        canva.pack(fill = tk.BOTH, expand = True)
+        canva = tk.Canvas(frame, width = 300, height = 300, bg = "black", highlightthickness = 0)
+        canva.pack(fill = tk.BOTH, expand = True, pady = 5)
 
-        circle_center_x = 285
-        circle_center_y = 150
+        circle_center_x = 355
+        circle_center_y = 110
         circle_radius = 100
 
         def create_circle(canva, x, y, r, **Kwargs):
             return canva.create_oval(x - r, y - r, x + r, y + r, **Kwargs)
         
-        create_circle(canva, circle_center_x, circle_center_y, circle_radius, fill = circle_color, outline = "")
+        create_circle(canva, circle_center_x, circle_center_y, circle_radius, fill = circle_color, outline = "black", width = 2)
 
 
     def show_month_view(self):
         #"""Displays the full month calendar."""#
-        for widget in Calendario.winfo_children():
-            widget.destroy()  # Clear previous widgets
+        for widget in self.winfo_children():
+            widget.pack_forget()  # Clear previous widgets
 
         self.get_humor()
 
-        self.cal = Calendar(Calendario, selectmode='day', year=datetime.now().year, month=datetime.now().month, day=datetime.now().day)
-        self.cal.pack(pady=20)
+        self.cal = Calendar(self, selectmode='day', year=datetime.now().year, month=datetime.now().month, day=datetime.now().day)
+        self.cal.pack(pady=30)
 
         self.display_events_on_calendar()
 
-        day_button = ctk.CTkButton(Calendario, width = 400, height = 45, corner_radius = 15, text="Mostrar Dia Atual", font = ("Ariel", 15), fg_color = "#1f538d", hover_color = "#14375e", command = lambda: self.show_day_view())
-        day_button.pack(pady = 10)
-
-        # Optional: Add a button to get selected date from calendar
+                # Optional: Add a button to get selected date from calendar
         def get_selected_date():
             selected_date = self.cal.get_date()
-            date_label.config(text=f"Data Selecionada: {selected_date}")
+            date_label.configure(text=f"Data Selecionada: {selected_date}")
 
-        select_button = ctk.CTkButton(Calendario, widht = 400, heigth = 45, corner_radius = 15, text = "Pegar Data Selecionada", font = ("Ariel", 15), fg_color = "#1f538d", hover_color = "#14375e", command = get_selected_date)
-        select_button.pack(pady = 5)
+        day_button = ctk.CTkButton(self, width = 300, height = 35, corner_radius = 15, text="Mostrar Dia Atual", font = ("Ariel", 15), fg_color = "#1f538d", hover_color = "#14375e", command = lambda: self.show_day_view())
+        day_button.pack(pady = 10)
 
-        date_label = ctk.CTkLabel(Calendario, text = "Data Selecionada: None")
+        select_button = ctk.CTkButton(self, width = 300, height = 35, corner_radius = 15, text = "Pegar Data Selecionada", font = ("Ariel", 15), fg_color = "#1f538d", hover_color = "#14375e", command = get_selected_date)
+        select_button.pack(pady = 10)
+
+
+
+        date_label = ctk.CTkLabel(self, text = "Data Selecionada: None")
         date_label.pack(pady = 5)
 
-    def New_event(self):
+
+    def New_event(self, mood_num: int, event_date):
     
-        moodNum = int(self.mood_input)
 
         mood_config = {
             1: ("Péssimo", "red", "yellow"),
@@ -125,22 +127,23 @@ class Calendario(ctk.CTkToplevel):
             5: ("Excelente", "green", "white")
         }
 
-        mood, moodCor, moodLetra = mood_config.get(moodNum, ("Indefinido", "White", "Black"))
+        mood, moodCor, moodLetra = mood_config.get(mood_num, ("Indefinido", "White", "Black"))
 
         new_event = {
-        'date': datetime.today().date(),
+        'date': event_date,
         'title': mood,
         'tag': mood,
         'background': moodCor,
         'foreground': moodLetra
         }
-        
-        verify = datetime.today().date()
-    
-        if verify not in self.events:
-            self.events.append(new_event)
-        else:
-            self.events['date': verify] = new_event
+        isNew_event = False
+        for i , event in enumerate(self.events):
+            if event['date'] == event_date:
+                self.events[i] = new_event
+                isNew_event = True
+
+            if not isNew_event:
+                self.events.append(new_event)
 
     def display_events_on_calendar(self):
         if not self.cal:
@@ -154,28 +157,53 @@ class Calendario(ctk.CTkToplevel):
                 print("algo deu errado")
 
     def get_humor(self):
+        
 
         try:
-            teste = []
-            teste = self.database.listar_questionarios()
+            teste = self.database.listar_questionarios(self.username)
+            dict_teste = dict(teste)
 
-            for event in teste:
-                event = teste.copy()
+            mood_num = 0
 
-                if event['humor'] == "Excelente":
-                    mood_num = 5
-                elif event['humor'] == "Bom":
-                    mood_num = 4
-                elif event['humor'] == "Mediano":
-                    mood_num = 3
-                elif event['humor'] == "Ruim":
-                    mood_num = 2
-                elif event['humor'] == "Péssimo":
-                    mood_num = 1
+            for event in enumerate(dict_teste):
+                for humor in event:
+                    
+                    humor = dict_teste.get('Humor', '')
 
+                    if humor == "Excelent":
+                        mood_num = 5
+                    elif humor == "Bom":
+                        mood_num = 4
+                    elif humor == "Mediano":
+                        mood_num = 3
+                    elif humor == "Ruim":
+                        mood_num = 2
+                    elif humor == "Péssimo":
+                        mood_num = 1
+
+            #for event in enumerate(dict_teste):
+             #   if "Excelent" in event:
+             #       mood_num = 5
+             #   elif "Bom" in event:
+             #       mood_num = 4
+             #   elif "Mediano" in event:
+             #       mood_num = 3
+             #   elif "Ruim" in event:
+             #       mood_num = 2
+             #   elif "Péssimo" in event:
+             #       mood_num = 1 
+
+                for item in enumerate(dict_teste):
+                    if item == "Data":
+                        data_questi = item
+
+                try:
+                    data_questi = datetime.strptime(data_questi, "%Y-%m-%d").data
+                except:
+                    data_questi = datetime.today().date()
              
                 if 1 <= mood_num <= 5:
-                    self.New_event()
+                    self.New_event(mood_num, data_questi)
                 
 
         except ValueError:

@@ -83,7 +83,7 @@ class MenuApp(ctk.CTkToplevel):
             self.frame_botoes,
             width=300,
             height=50,
-            text="Opção 3".upper(),
+            text="Calendário".upper(),
             font=("Century Gothic Bold", 14),
             corner_radius=15,
             command=self.abrir_tela3
@@ -95,7 +95,7 @@ class MenuApp(ctk.CTkToplevel):
             self.frame_botoes,
             width=300,
             height=50,
-            text="Calendário".upper(),
+            text="Opção 4".upper(),
             font=("Century Gothic Bold", 14),
             corner_radius=15,
             command=self.abrir_tela4
@@ -139,8 +139,7 @@ class MenuApp(ctk.CTkToplevel):
         calendario2_0.Calendario(self, self.username)
     
     def abrir_tela4(self):
-        import calendario2_0
-        calendario2_0.Calendario(self, self.username)
+        messagebox.showinfo("Menu", "Tela 4 ainda não implementada")
     
     def abrir_tela5(self):
         messagebox.showinfo("Menu", "Tela 5 ainda não implementada!")
