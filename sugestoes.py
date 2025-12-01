@@ -68,7 +68,7 @@ class SugestoesApp(ctk.CTkToplevel):
         # Título
         self.lb_titulo = ctk.CTkLabel(
             self,
-            text="💡 Sugestões de Bem-Estar",
+            text="Sugestões de Bem-Estar",
             font=("Century Gothic Bold", 32)
         )
         self.lb_titulo.pack(pady=20)
