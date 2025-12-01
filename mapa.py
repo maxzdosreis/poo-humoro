@@ -5,7 +5,16 @@ from database import Database
 from datetime import datetime
 import locale
 
+'''
+    Classe: Mapa
+    Objetos:
+        - CTkFrame
+        - CTkButton
+        - CTkLabel
+        - Canvas
+'''
 class Mapa(ctk.CTkToplevel):
+    # Cores que representam cada emoção no mapa emocional.
     CORES = {
         "Excelente": "#006400",
         "Bom": "#90EE90",
@@ -14,6 +23,7 @@ class Mapa(ctk.CTkToplevel):
         "Péssimo": "#8B0000"
     }
 
+    # Array de meses com os nomes em português.
     MESES_PT = [
         "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
@@ -21,21 +31,39 @@ class Mapa(ctk.CTkToplevel):
 
     def __init__(self, parent, username):
         super().__init__(parent)
+
+        # username: nome de usuário para exibição na tela 
         self.username = username
+
+        # db: banco de dados para checagem de dias respondidos
         self.db = Database()
+
+        # ano: ano atual para limitar o calendário
         self.ano = 2025
 
         # começa no mês atual do sistema, mas forçando 2025
         self.mes = datetime.now().month
 
+        # configuracoes: configurações específicas utilizadas na tela na instância da tela
         self.configuracoes()
+
+        # top_bar: barra de navegação horizontal na parte de cima da tela
         self.top_bar()
+
+        # canvas_area: parte central da tela onde o mapa é desenhado
         self.canvas_area()
+
+        # desenhar_mapa: função para desenhar o mapa emocional no centro da tela
         self.desenhar_mapa()
+
+        # botao_voltar: botão para retornar à tela inicial
         self.botao_voltar()
 
         self.protocol("WM_DELETE_WINDOW", self.destroy)
 
+    '''
+        Configurações para criar a tela.
+    '''
     def configuracoes(self):
         self.geometry("900x700")
         self.title("Mapa do Humor")
@@ -44,6 +72,9 @@ class Mapa(ctk.CTkToplevel):
         self.focus_force()
         self.grab_set()
 
+    '''
+        Criação da barra de navegação horizontal superior.
+    '''
     def top_bar(self):
         # Frame topo, sem cor fixa, herdando tema default
         top = ctk.CTkFrame(self, height=70)
@@ -90,6 +121,9 @@ class Mapa(ctk.CTkToplevel):
         self.db.desconecta_db()
         return r[0] if r else None
 
+    '''
+        Desenhando mapa no centro da tela (canvas).
+    '''
     def desenhar_mapa(self):
         self.canvas.delete("all")
 
@@ -121,18 +155,27 @@ class Mapa(ctk.CTkToplevel):
             # adiciona área clicável
             self.canvas.tag_bind(bola, "<Button-1>", lambda e, d=dia: self.abrir_questionario_dia(d))
 
+    '''
+        Navegação para o próximo mês do calendário.
+    '''
     def proximo_mes(self):
         if self.mes < 12:
             self.mes += 1
             self.lb_mes.configure(text=self.MESES_PT[self.mes-1])
             self.desenhar_mapa()
 
+    '''
+        Navegação para o mês anterior do calendário.
+    '''
     def mes_anterior(self):
         if self.mes > 1:
             self.mes -= 1
             self.lb_mes.configure(text=self.MESES_PT[self.mes-1])
             self.desenhar_mapa()
 
+    '''
+        Criação do botão para retornar ao menu inicial.
+    '''
     def botao_voltar(self):
         self.btn_voltar = ctk.CTkButton(
             self,
@@ -145,5 +188,8 @@ class Mapa(ctk.CTkToplevel):
         )
         self.btn_voltar.pack(side="bottom", pady=20)
 
+    '''
+        Fechar a janela atual quando retornar ao menu principal.
+    '''
     def voltar_menu(self):
         self.destroy()
